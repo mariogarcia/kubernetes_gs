@@ -1,0 +1,46 @@
+- name: base libraries
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - curl
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg2
+    - software-properties-common
+
+- name: add docker key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+
+- name: add docker repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/debian stretch stable
+    state: present
+
+- name: docker
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - docker-ce
+    - docker-compose
+
+- name: add kubernetes key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: add kubernetes repository
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+- name: kubernetes
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
