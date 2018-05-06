@@ -1,5 +1,15 @@
-- name: swap off
+- name: Remove swapfile from /etc/fstab
+  mount:
+    path: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - none
+    - swap
+
+- name: Disable swap
   command: swapoff -a
+  when: ansible_swaptotal_mb > 0
 
 - name: base libraries
   apt:
