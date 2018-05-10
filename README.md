@@ -50,7 +50,7 @@ The only load balancer available to work with kubernetes and baremetal
 is MetalLB. You can install it with kubectl:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.6.2/manifests/tutorial-2.yaml
+kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.6.2/manifests/metallb.yaml
 ```
 
 Now it's time to configure a pool of available public IPs that will be
@@ -81,4 +81,27 @@ kubectl create -f metallb-config.yaml
 
 Now you can use this configuration in a kubernetes service. When
 asking for exposing your service through the load balancer it will
-expose the service in any of the public ips available in the pool.
+expose the service in any of the public ips available in the pool. The
+following example is taken from the `metallb` tutorial and installs an
+`nginx` and ask the load balancer to expose it in an available ip:
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.6.2/manifests/tutorial-2.yaml
+```
+
+Aterwards you can execute the following command to check where the
+service has been exposed:
+
+```shell
+watch kubectl get services
+```
+
+At some point you will see something like this:
+
+```shell
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP       PORT(S)        AGE
+kubernetes   ClusterIP      10.96.0.1       <none>            443/TCP        2h
+nginx        LoadBalancer   10.110.154.95   192.168.250.112   80:32293/TCP   2h
+```
+
+Then you can go and browse `http://192.168.250.112`
