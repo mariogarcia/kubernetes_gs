@@ -15,7 +15,12 @@ vagrant up
 Because all machines will have a bridged network interface you will be
 prompted to chose which bridged interface will the machine be using.
 
+There're more information about how to configure networks with vagrant at:
+https://www.vagrantup.com/docs/networking/public_network.html
+
 ## Initializing the cluster
+
+This section is based on the tutorial at: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
 
 I'm choosing `sherlock` as the master node. So you have to go to the
 `sherlock` directory enter the vagrant machine and execute:
@@ -45,6 +50,8 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documen
 ```
 
 ## Installing Load Balancer
+
+This section is based in the `metallb` tutorial at: https://metallb.universe.tf/tutorial/layer2/
 
 The only load balancer available to work with kubernetes and baremetal
 is MetalLB. You can install it with kubectl:
@@ -105,3 +112,7 @@ nginx        LoadBalancer   10.110.154.95   192.168.250.112   80:32293/TCP   2h
 ```
 
 Then you can go and browse `http://192.168.250.112`
+
+# Other references
+
+- An article about MetalLB at HackerNoon https://hackernoon.com/metallb-a-load-balancer-for-bare-metal-kubernetes-clusters-f7320fde52f2
