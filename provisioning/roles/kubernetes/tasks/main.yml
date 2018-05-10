@@ -11,6 +11,12 @@
   command: swapoff -a
   when: ansible_swaptotal_mb > 0
 
+- name: networking requirements
+  command: "{{ item }}"
+  with_items:
+    - sudo modprobe br_netfilter
+    - sudo sysctl net.bridge.bridge-nf-call-iptables=1
+
 - name: base libraries
   apt:
     name: "{{ item }}"
@@ -22,38 +28,39 @@
     - curl
     - gnupg2
     - software-properties-common
+    - ebtables
+    - ethtool
+    - bridge-utils
 
-- name: add docker key
+- name: add keys
   apt_key:
-    url: https://download.docker.com/linux/debian/gpg
+    url: "{{ item }}"
+  with_items:
+    - https://download.docker.com/linux/ubuntu/gpg
+    - https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
-- name: add docker repository
+- name: add repositories
   apt_repository:
-    repo: deb https://download.docker.com/linux/debian stretch stable
+    repo: "{{ item }}"
     state: present
+  with_items:
+    - deb https://download.docker.com/linux/ubuntu xenial stable
+    - deb http://apt.kubernetes.io/ kubernetes-xenial main
 
-- name: docker
+- name: install docker and k8s
   apt:
     name: "{{ item }}"
     state: present
   with_items:
-    - docker-ce
+    - docker-ce=17.03.2~ce-0~ubuntu-xenial
     - docker-compose
-
-- name: add kubernetes key
-  apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-
-- name: add kubernetes repository
-  apt_repository:
-    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
-    state: present
-
-- name: kubernetes
-  apt:
-    name: "{{ item }}"
-    state: present
-  with_items:
     - kubelet
     - kubeadm
     - kubectl
+
+- name: adding kubi to docker group
+  user:
+    name: kubi
+    groups:
+      - docker
+    append: yes
