@@ -1,5 +1,18 @@
+- name: copy metallb config to guest
+  template:
+    src: metallb-config.yml
+    dest: /home/kubi
+    mode: u+rw
+  become_user: kubi
+
 - name: apply metallb manifest
   command: "kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.6.2/manifests/metallb.yaml"
   args:
     chdir: /home/kubi
+  become_user: kubi
+
+- name: apply metallb config
+  command: "kubectl apply -f metallb-config.yml"
+  args:
+    chdir: /home/kubi/
   become_user: kubi
