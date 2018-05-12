@@ -13,9 +13,10 @@
 
 - name: networking requirements
   command: "{{ item }}"
+  become: true
   with_items:
-    - sudo modprobe br_netfilter
-    - sudo sysctl net.bridge.bridge-nf-call-iptables=1
+    - modprobe br_netfilter
+    - sysctl net.bridge.bridge-nf-call-iptables=1
 
 - name: base libraries
   apt:

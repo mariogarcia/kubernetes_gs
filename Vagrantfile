@@ -1,27 +1,38 @@
 Vagrant.configure("2") do |config|
 
-  machines = {
-    "sherlock" => "192.168.250.102",
-    "watson"   => "192.168.250.103"
+  # node configurations
+  nodes = {
+    "sherlock": {
+      ip: "192.168.250.102",
+      is_master: true,
+      memory: "4096",
+      disk: "10GB"
+    }
   }
 
-  machines.each { |name, ip|
+  # shell provisioning
+  del_default_gateway = "route del default gw 0"
+  add_gateway_command = "route add default gw 192.168.250.1"
+
+  # loop through all configured nodes
+  nodes.each { |name, ndata|
     config.vm.define name do |node|
       node.vm.box = "ubuntu/xenial64"
-      node.disksize.size = '10GB'
+      node.disksize.size = ndata[:disk]
       node.vm.hostname = name
-      node.vm.network "public_network", ip: ip
-      node.vm.provision "shell",
-                        run: "always",
-                        inline: "route add default gw 192.168.250.1"
+      node.vm.network "public_network", ip: ndata[:ip]
+
+      node.vm.provision "shell", inline: del_default_gateway
+      node.vm.provision "shell", inline: add_gateway_command
 
       node.vm.provider "virtualbox" do |vb|
-        vb.memory = "4096"
+        vb.memory = ndata[:memory]
       end
 
       node.vm.provision "ansible" do |ansible|
-        ansible.playbook = "provisioning/playbook.yml"
+        ansible.playbook = "provisioning/playbook-#{ ndata[:is_master] ? 'master' : 'slave' }.yml"
       end
+
     end
   }
 end

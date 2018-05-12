@@ -1,0 +1,45 @@
+- name: copy scripts to node
+  template:
+    src: "{{ item }}"
+    dest: /home/kubi
+    mode: u+rwx
+  become_user: kubi
+  with_items:
+    - init.sh
+    - conf.sh
+    - netw.sh
+    - join.sh
+
+- name: execute init
+  command: /home/kubi/init.sh
+  args:
+    chdir: /home/kubi/
+    creates: /etc/kubernetes/admin.conf
+  become: true
+
+- name: execute config
+  command: /home/kubi/conf.sh
+  args:
+    chdir: /home/kubi/
+    creates: /home/kubi/.kubi/config
+  become: true
+
+- name: apply POD network
+  command: /home/kubi/netw.sh
+  args:
+    chdir: /home/kubi
+    creates: /home/kubi/.kubi/config
+  become_user: kubi
+
+- name: execute the show how to join command
+  command: /home/kubi/join.sh
+  args:
+    chdir: /home/kubi
+    creates: "{{ master_join_script_path }}"
+  become_user: kubi
+
+- name: copy the join command to make it available to slave nodes
+  fetch:
+    src: "{{ master_join_script_path }}"
+    dest: "{{ master_join_script_path }}"
+    flat: yes
