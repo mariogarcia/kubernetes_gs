@@ -7,7 +7,6 @@
   with_items:
     - init.sh
     - conf.sh
-    - netw.sh
     - join.sh
 
 - name: execute init
@@ -23,13 +22,6 @@
     chdir: /home/kubi/
     creates: /home/kubi/.kubi/config
   become: true
-
-- name: apply POD network
-  command: /home/kubi/netw.sh
-  args:
-    chdir: /home/kubi
-    creates: /home/kubi/.kubi/config
-  become_user: kubi
 
 - name: execute the show how to join command
   command: /home/kubi/join.sh

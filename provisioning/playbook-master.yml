@@ -9,3 +9,5 @@
     - base
     - kubernetes
     - init
+    - podnet
+    - metallb

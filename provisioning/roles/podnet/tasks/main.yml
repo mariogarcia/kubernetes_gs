@@ -1,0 +1,13 @@
+- name: copy scripts to node
+  template:
+    src: netw.sh
+    dest: /home/kubi
+    mode: u+rwx
+  become_user: kubi
+
+- name: apply POD network
+  command: /home/kubi/netw.sh
+  args:
+    chdir: /home/kubi
+    creates: /home/kubi/.kubi/config
+  become_user: kubi
