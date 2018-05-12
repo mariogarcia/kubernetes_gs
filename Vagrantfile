@@ -7,6 +7,12 @@ Vagrant.configure("2") do |config|
       is_master: true,
       memory: "4096",
       disk: "10GB"
+    },
+    "watson": {
+      ip: "192.168.250.103",
+      is_master: false,
+      memory: "4096",
+      disk: "10GB"
     }
   }
 
