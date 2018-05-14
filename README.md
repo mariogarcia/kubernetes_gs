@@ -1,64 +1,80 @@
 # Kubernetes cluster
 
-This project install Kubernetes in three different machines using
-Ubuntu/Xenial64. In order to configure the cluster you should follow
-certain steps.
+This project installs a Kubernetes cluster in a Vagrant box with
+Ubuntu/Xenial64.
 
-## Building vagrant box
+## Configuration
 
-Go to every of the machines directories and execute:
+### Nodes
+
+First of all you have to enumerate all nodes you want your cluster to
+have. By default there's only one master and one slave. This can be
+found in the `Vagrantfile`:
+
+```ruby
+  # node configurations
+  nodes = {
+    "sherlock": {
+      ip: "192.168.250.102",
+      is_master: true,
+      memory: "4096",
+      disk: "10GB"
+    },
+    "watson": {
+      ip: "192.168.250.103",
+      is_master: false,
+      memory: "4096",
+      disk: "10GB"
+    }
+  }
+```
+
+Master IP will be used in Kubernetes initialization as the master
+advertise address `--apiserver-advertise-address`:
+
+```shell
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.250.38
+```
+
+### Network
+
+Apart from the static public IP defined in the nodes map, you have
+also to set which is the default gateway of the cluster:
+
+```ruby
+add_gateway_command = "route add default gw 192.168.250.1"
+```
+
+## Installation
+
+Go to the project root folder and execute:
 
 ```shell
 vagrant up
 ```
 
 Because all machines will have a bridged network interface you will be
-prompted to chose which bridged interface will the machine be using.
+prompted to chose which bridged interface to use.
 
 There're more information about how to configure networks with vagrant at:
 https://www.vagrantup.com/docs/networking/public_network.html
 
-## Initializing the cluster
+## Components installed
 
-This section is based on the tutorial at: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
-
-I'm choosing `sherlock` as the master node. So you have to go to the
-`sherlock` directory enter the vagrant machine and execute:
-
-```shell
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.250.38
-```
-
-Where `--pod-network-cidr=10.244.0.0/16` can remain the same (it's a
-requirement from flannel cid network) and
-`--apiserver-advertise-address=192.168.250.38` should be the ip where
-the master will be available to slave nodes. This execution will show the join
-command line that has to be executed in slave nodes afterwards. But first you
-have to install the `POD network`.
-
-## Installing POD network
+### POD network
 
 There are several pod network choices, but I'm using `flannel` because
 it's fully compatible with both load balancer `metallb` and the
 `openebs` distributed storage solution.
 
-One of the requirements of `flannel` is to initialize the master cluster with a specific
-`--pod-network-cidr` parameter. Because we've already done this we can move forward and install it via `kubectl`:
+One of the requirements of `flannel` is to initialize the master
+cluster with a specific `--pod-network-cidr` parameter. Because we've
+already done this we can move forward and install it via `kubectl`:
 
-```shell
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml
-```
-
-## Installing Load Balancer
-
-This section is based in the `metallb` tutorial at: https://metallb.universe.tf/tutorial/layer2/
+### Load Balancer
 
 The only load balancer available to work with kubernetes and baremetal
-is MetalLB. You can install it with kubectl:
-
-```shell
-kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.6.2/manifests/metallb.yaml
-```
+is MetalLB.
 
 Now it's time to configure a pool of available public IPs that will be
 handled by MetalLB. Because I've available `192.168.250.110/29` that's
@@ -77,13 +93,6 @@ data:
       protocol: layer2
       addresses:
       - 192.168.250.112/29
-```
-
-I'm saving that configuration to `metallb-config.yaml` and then I create
-that configuration in kubernetes:
-
-```shell
-kubectl create -f metallb-config.yaml
 ```
 
 Now you can use this configuration in a kubernetes service. When
@@ -112,7 +121,3 @@ nginx        LoadBalancer   10.110.154.95   192.168.250.112   80:32293/TCP   2h
 ```
 
 Then you can go and browse `http://192.168.250.112`
-
-# Other references
-
-- An article about MetalLB at HackerNoon https://hackernoon.com/metallb-a-load-balancer-for-bare-metal-kubernetes-clusters-f7320fde52f2
