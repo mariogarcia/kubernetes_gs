@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
       end
 
       node.vm.provision "ansible" do |ansible|
-        ansible.playbook = "provisioning/playbook-#{ ndata[:is_master] ? 'master' : 'slave' }.yml"
+        ansible.playbook = "ansible/playbook-#{ ndata[:is_master] ? 'master' : 'slave' }.yml"
       end
 
     end
