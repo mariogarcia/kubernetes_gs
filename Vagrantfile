@@ -1,9 +1,18 @@
 Vagrant.configure("2") do |config|
 
-  # node configurations
+  # master ip
+  master_ip = "192.168.250.102"
+
+  # cluster default gateway ip
+  gateway_ip = "192.168.250.1"
+
+  # metallb network mask to get ips from the pool
+  metallb_netmask = "192.168.250.112/29"
+
+  # nodes to be built
   nodes = {
     "sherlock": {
-      ip: "192.168.250.102",
+      ip: master_ip,
       is_master: true,
       memory: "4096",
       disk: "10GB"
@@ -18,7 +27,7 @@ Vagrant.configure("2") do |config|
 
   # shell provisioning
   del_default_gateway = "route del default gw 0"
-  add_gateway_command = "route add default gw 192.168.250.1"
+  add_gateway_command = "route add default gw #{ gateway_ip }"
 
   # loop through all configured nodes
   nodes.each { |name, ndata|
@@ -37,6 +46,10 @@ Vagrant.configure("2") do |config|
 
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "ansible/playbook-#{ ndata[:is_master] ? 'master' : 'slave' }.yml"
+        ansible.extra_vars = {
+          master_ip: master_ip,
+          metallb_addresses: metallb_netmask
+        }
       end
 
     end

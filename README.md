@@ -5,17 +5,26 @@ Ubuntu/Xenial64.
 
 ## Configuration
 
-### Nodes
-
 First of all you have to enumerate all nodes you want your cluster to
 have. By default there's only one master and one slave. This can be
 found in the `Vagrantfile`:
 
+
+
 ```ruby
-  # node configurations
+  # master ip
+  master_ip = "192.168.250.102"
+
+  # cluster default gateway ip
+  gateway_ip = "192.168.250.1"
+
+  # metallb network mask to get ips from the pool
+  metallb_netmask = "192.168.250.112/29"
+
+  # nodes to be built
   nodes = {
     "sherlock": {
-      ip: "192.168.250.102",
+      ip: master_ip,
       is_master: true,
       memory: "4096",
       disk: "10GB"
@@ -35,8 +44,6 @@ advertise address `--apiserver-advertise-address`:
 ```shell
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.250.38
 ```
-
-### Network
 
 Apart from the static public IP defined in the nodes map, you have
 also to set which is the default gateway of the cluster:
@@ -77,8 +84,9 @@ The only load balancer available to work with kubernetes and baremetal
 is MetalLB.
 
 Now it's time to configure a pool of available public IPs that will be
-handled by MetalLB. Because I've available `192.168.250.110/29` that's
-the range of IPs I'm giving to the pool:
+handled by MetalLB. By default the image is using a layer 2 strategy
+with `192.168.250.110/29` netmask as the range of IPs I'm giving to
+the pool:
 
 ```yaml
 apiVersion: v1
@@ -95,11 +103,11 @@ data:
       - 192.168.250.112/29
 ```
 
-Now you can use this configuration in a kubernetes service. When
-asking for exposing your service through the load balancer it will
-expose the service in any of the public ips available in the pool. The
-following example is taken from the `metallb` tutorial and installs an
-`nginx` and ask the load balancer to expose it in an available ip:
+You can change the netmask in `Vagrantfile`.
+
+The following example is taken from the `metallb` tutorial and
+installs an `nginx` and ask the load balancer to expose it in an
+available ip:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.6.2/manifests/tutorial-2.yaml

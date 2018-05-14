@@ -2,9 +2,6 @@
   become: true
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    master_ip: 192.168.250.102
-    master_join_script_path: /tmp/join-to-master.sh
-    metallb_addresses: 192.168.250.112/29
 
   roles:
     - base
