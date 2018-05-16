@@ -7,3 +7,5 @@
     - base
     - kubernetes
     - join
+    - nfs_common
+    - nfs_client

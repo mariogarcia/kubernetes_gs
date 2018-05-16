@@ -6,3 +6,4 @@
     - curl
     - nfs-common
     - nfs-kernel-server
+  when: nfs_active == "yes"

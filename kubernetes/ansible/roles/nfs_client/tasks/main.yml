@@ -1,0 +1,19 @@
+- name: create shared directories
+  file:
+    path: "/var/nfs"
+    state: directory
+    owner: nobody
+    group: nogroup
+    mode: 755
+  creates: /var/nfs
+  when: nfs_active == "yes"
+
+- name: mount nfs
+  mount:
+    src: "{{ nfs_ip }}:/var/nfs"
+    path: "/var/nfs"
+    fstype: nfs
+    opts: defaults,rw,bg
+    state: mounted
+  creates: /var/nfs
+  when: nfs_active == "yes"

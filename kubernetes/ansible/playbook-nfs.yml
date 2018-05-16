@@ -5,4 +5,5 @@
 
   roles:
     - base
-    - nfs
+    - nfs_common
+    - nfs_server

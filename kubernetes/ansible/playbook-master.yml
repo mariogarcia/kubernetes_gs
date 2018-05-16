@@ -9,3 +9,5 @@
     - init
     - podnet
     - metallb
+    - nfs_common
+    - nfs_client
