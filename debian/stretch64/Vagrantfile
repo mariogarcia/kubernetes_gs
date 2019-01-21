@@ -1,0 +1,22 @@
+# config variables
+
+config = {
+  name: "somebody",
+  ip: "192.168.1.34",
+  memory: "4096",
+  disk: "10GB"
+}
+
+# vagrant script
+Vagrant.configure("2") do |config|
+  config.vm.define config[:name] do |node|
+    node.vm.box = "debian/stretch64"
+    node.disksize.size = config[:disk]
+
+    node.vm.hostname = config[:name]
+    node.vm.network "public_network", ip: config[:ip]
+    node.vm.provider "virtualbox" do |vb|
+      vb.memory = config[:memory]
+    end
+  end
+end
